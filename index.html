@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma de Proyecto Multipais 2026</title>
+<!-- SheetJS para leer Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --navy:       #0a2240;
+    --navy-mid:   #123a6b;
+    --navy-light: #1a5294;
+    --blue:       #2a7fc1;
+    --blue-light: #5ba3d9;
+    --blue-pale:  #d6eaf8;
+    --blue-soft:  #eaf4fb;
+    --gray-dark:  #3d4a5c;
+    --gray-mid:   #6b7a8d;
+    --gray-light: #b0bec9;
+    --gray-pale:  #e8ecf0;
+    --gray-bg:    #f4f6f8;
+    --white:      #ffffff;
+    --ve:         #1a5294;
+    --ve-bg:      #d6eaf8;
+    --co:         #1a6b3a;
+    --co-bg:      #d4edde;
+    --ar:         #7a4f0d;
+    --ar-bg:      #faebd0;
+    --success-bg: #d4edde;
+    --success:    #1a6b3a;
+    --info-bg:    #d6eaf8;
+    --info:       #1a5294;
+    --pending-bg: #e8ecf0;
+    --pending:    #3d4a5c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--gray-bg);
+    color: var(--gray-dark);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+    color: var(--white);
+    padding: 32px 40px 28px;
+    border-bottom: 3px solid var(--blue);
+  }
+  .page-header h1 { font-size: 26px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 6px; }
+  .page-header p  { font-size: 13px; color: var(--blue-pale); opacity: .85; }
+  .header-meta { display: flex; gap: 24px; margin-top: 18px; flex-wrap: wrap; }
+  .header-meta span {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--blue-pale);
+  }
+  .header-meta span b { color: #fff; font-weight: 600; }
+
+  /* ── Tabs ── */
+  .tabs-bar {
+    background: var(--navy);
+    display: flex;
+    align-items: flex-end;
+    padding: 0 40px;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blue-pale);
+    background: transparent;
+    border: none;
+    border-top: 3px solid transparent;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+    opacity: .75;
+  }
+  .tab-btn:hover { opacity: 1; color: #fff; background: rgba(255,255,255,.07); }
+  .tab-btn.active {
+    background: var(--gray-bg);
+    color: var(--navy);
+    border-top-color: var(--blue);
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  /* ── Tab content ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Layout ── */
+  .content { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: var(--blue);
+    border-radius: 2px;
+  }
+
+  /* ── Project Filter (new) ── */
+  .project-filter-wrap {
+    background: var(--white);
+    border: 1px solid var(--gray-pale);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .project-filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+  .project-select {
+    padding: 8px 36px 8px 14px;
+    border: 1.5px solid var(--gray-light);
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-dark);
+    background: var(--white);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7a8d' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    min-width: 220px;
+    transition: border-color .15s;
+  }
+  .project-select:focus { outline: none; border-color: var(--blue); }
+  .project-badge-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ── Filter Buttons ── */
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center; }
+  .filter-label { font-size: 12px; color: var(--gray-mid); font-weight: 500; }
+  .pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--gray-light);
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--gray-mid);
+  }
+  .pill:hover { border-color: var(--blue); color: var(--blue); }
+  .pill.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+  /* ── Summary Cards ── */
+  .summary-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 28px; }
+  .s-card {
+    background: var(--white);
+    border: 1px solid var(--gray-pale);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-top: 3px solid var(--blue);
+  }
+  .s-card .val { font-size: 26px; font-weight: 700; color: var(--navy); }
+  .s-card .lbl { font-size: 11px; color: var(--gray-mid); margin-top: 3px; text-transform: uppercase; letter-spacing: .04em; }
+  @media (max-width: 900px) { .summary-cards { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px) { .summary-cards { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ── Gantt ── */
+  .gantt-outer { background: var(--white); border: 1px solid var(--gray-pale); border-radius: 12px; overflow: hidden; }
+  .gantt-scroll { overflow-x: auto; }
+  table.gantt {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 900px;
+    font-size: 12px;
+  }
+  table.gantt thead th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 10px 12px;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-align: left;
+    white-space: nowrap;
+  }
+  table.gantt tbody tr:hover td { background: var(--blue-soft); }
+  table.gantt td { padding: 5px 12px; border-bottom: 1px solid var(--gray-pale); vertical-align: middle; }
+  table.gantt tr:last-child td { border-bottom: none; }
+  .g-group td {
+    background: var(--blue-soft);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--navy);
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--blue-pale);
+  }
+
+  .gantt-bar-cell { min-width: 440px; padding: 5px 12px; }
+  .gantt-timeline { position: relative; height: 22px; }
+  .g-bar {
+    position: absolute;
+    height: 14px;
+    top: 4px;
+    border-radius: 3px;
+    transition: opacity .15s;
+  }
+  .g-bar:hover { opacity: .8; }
+  .g-dot { width: 14px; border-radius: 50%; }
+  .bar-ve  { background: var(--blue); }
+  .bar-co  { background: #2a9a5f; }
+  .bar-ar  { background: #c98020; }
+  .today-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: #e04040;
+    z-index: 2;
+    border-radius: 1px;
+  }
+  .today-tip {
+    position: absolute;
+    top: -16px;
+    font-size: 9px;
+    color: #e04040;
+    font-weight: 700;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    letter-spacing: .03em;
+  }
+  .month-ruler {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px 6px calc(12px + 70px + 130px + 200px);
+    background: var(--blue-soft);
+    border-bottom: 1px solid var(--blue-pale);
+    font-size: 10px;
+    color: var(--navy-light);
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+
+  /* ── Badges ── */
+  .country-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .cbadge-ve { background: var(--ve-bg); color: var(--ve); }
+  .cbadge-co { background: var(--co-bg); color: var(--co); }
+  .cbadge-ar { background: var(--ar-bg); color: var(--ar); }
+  .resp-tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    background: var(--gray-bg);
+    border: 1px solid var(--gray-pale);
+    font-size: 11px;
+    color: var(--gray-dark);
+    white-space: nowrap;
+  }
+
+  /* ── Detail Table ── */
+  .detail-outer { background: var(--white); border: 1px solid var(--gray-pale); border-radius: 12px; overflow: hidden; }
+  .detail-scroll { overflow-x: auto; }
+  table.detail {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 860px;
+    font-size: 13px;
+  }
+  table.detail thead th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 11px 13px;
+    font-weight: 500;
+    font-size: 11px;
+    text-align: left;
+    white-space: nowrap;
+    letter-spacing: .04em;
+  }
+  table.detail thead th:first-child { width: 42px; }
+  table.detail td { padding: 11px 13px; border-bottom: 1px solid var(--gray-pale); vertical-align: middle; }
+  table.detail tr:last-child td { border-bottom: none; }
+  table.detail tr:hover td { background: var(--blue-soft); }
+  .num-cell { color: var(--gray-mid); font-size: 12px; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 5px;
+    font-size: 11px; font-weight: 600;
+  }
+  .s-done    { background: var(--success-bg); color: var(--success); }
+  .s-prog    { background: var(--info-bg); color: var(--info); }
+  .s-pend    { background: var(--pending-bg); color: var(--pending); }
+  .dur-wrap  { display: flex; align-items: center; gap: 8px; }
+  .dur-bar   { height: 6px; border-radius: 3px; flex-shrink: 0; min-width: 4px; }
+  .dur-ve    { background: var(--blue); opacity: .55; }
+  .dur-co    { background: #2a9a5f; opacity: .55; }
+  .dur-ar    { background: #c98020; opacity: .55; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+    margin-bottom: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-mid); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .legend-today { width: 3px; height: 14px; border-radius: 2px; background: #e04040; }
+
+  /* ── ADMIN TAB ── */
+  .admin-content { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+  .admin-card {
+    background: var(--white);
+    border: 1px solid var(--gray-pale);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+  }
+  .admin-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .admin-card p.desc {
+    font-size: 13px;
+    color: var(--gray-mid);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--gray-light);
+    border-radius: 10px;
+    padding: 40px 24px;
+    text-align: center;
+    background: var(--gray-bg);
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-zone h4 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .upload-zone p { font-size: 12px; color: var(--gray-mid); }
+
+  /* Upload button */
+  .btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 11px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+    margin-top: 16px;
+  }
+  .btn-upload:hover { background: var(--navy-light); }
+  .btn-upload:disabled { opacity: .5; cursor: default; }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--white);
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+    border-radius: 7px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .15s;
+    margin-top: 16px;
+    margin-left: 10px;
+    text-decoration: none;
+  }
+  .btn-secondary:hover { background: var(--navy); color: #fff; }
+
+  /* Upload result */
+  .upload-result {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: none;
+  }
+  .upload-result.success { background: var(--success-bg); color: var(--success); border: 1px solid #a8d5b8; }
+  .upload-result.error   { background: #fde8e8; color: #c0392b; border: 1px solid #f5b7b7; }
+  .upload-result.info    { background: var(--info-bg); color: var(--info); border: 1px solid #a8c9e8; }
+
+  /* Schema table */
+  .schema-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .schema-table th {
+    background: var(--navy);
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: .04em;
+  }
+  .schema-table td { padding: 8px 12px; border-bottom: 1px solid var(--gray-pale); vertical-align: top; }
+  .schema-table tr:last-child td { border-bottom: none; }
+  .schema-table tr:hover td { background: var(--blue-soft); }
+  .col-required { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #fde8e8; color: #c0392b; }
+  .col-optional { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; background: var(--pending-bg); color: var(--pending); }
+
+  /* Preview table */
+  .preview-wrap {
+    margin-top: 20px;
+    background: var(--white);
+    border: 1px solid var(--gray-pale);
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+  }
+  .preview-header {
+    background: var(--blue-soft);
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    border-bottom: 1px solid var(--blue-pale);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .preview-scroll { overflow-x: auto; max-height: 300px; overflow-y: auto; }
+  table.preview-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 11px;
+    min-width: 600px;
+  }
+  table.preview-table th {
+    background: var(--navy);
+    color: #fff;
+    padding: 7px 10px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 11px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  table.preview-table td { padding: 6px 10px; border-bottom: 1px solid var(--gray-pale); }
+  table.preview-table tr:hover td { background: var(--blue-soft); }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; }
+    .filter-bar, .no-print { display: none; }
+    .content { padding: 16px; }
+    .page-header { background: var(--navy) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* Notification toast */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,.25);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    max-width: 340px;
+  }
+  .toast.show { display: flex; }
+  .toast-success { border-left: 4px solid #2a9a5f; }
+  .toast-error   { border-left: 4px solid #e04040; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Cronograma de Proyecto Multipais</h1>
+  <p>Seguimiento de actividades por país, responsable y estado</p>
+  <div class="header-meta">
+    <span><b>Periodo:</b> Feb – May 2026</span>
+    <span><b>Países:</b> Venezuela · Colombia · Argentina</span>
+    <span><b>Generado:</b> 08 Abr 2026</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('admin',this)">⚙️ Administración</button>
+</div>
+
+<!-- ══════════════ TAB: DASHBOARD ══════════════ -->
+<div id="tab-dashboard" class="tab-panel active">
+  <div class="content">
+
+    <!-- Project Filter (NEW) -->
+    <div class="project-filter-wrap no-print">
+      <span class="project-filter-label">📁 Proyecto visualizado:</span>
+      <select class="project-select" id="project-select" onchange="onProjectChange(this)">
+        <option value="Implementación de Etiquetas Amarillas">Implementación de Etiquetas Amarillas</option>
+      </select>
+      <span class="project-badge-active" id="project-badge">📌 Implementación de Etiquetas Amarillas</span>
+    </div>
+
+    <!-- Country Filters -->
+    <div class="filter-bar no-print">
+      <span class="filter-label">Filtrar por país:</span>
+      <button class="pill active" onclick="setFilter('all',this)">Todos</button>
+      <button class="pill" onclick="setFilter('Venezuela',this)">🇻🇪 Venezuela</button>
+      <button class="pill" onclick="setFilter('Colombia',this)">🇨🇴 Colombia</button>
+      <button class="pill" onclick="setFilter('Argentina',this)">🇦🇷 Argentina</button>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-cards" id="summary-cards"></div>
+
+    <!-- Gantt -->
+    <div class="section">
+      <p class="section-title">1. Cronograma de Gantt</p>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>Venezuela</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#2a9a5f"></span>Colombia</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#c98020"></span>Argentina</span>
+        <span class="legend-item"><span class="legend-today"></span>Hoy (8 Abr)</span>
+      </div>
+      <div class="gantt-outer">
+        <div class="month-ruler" id="month-ruler">
+          <span>FEB</span><span>MAR</span><span>ABR</span><span>MAY</span>
+        </div>
+        <div class="gantt-scroll">
+          <table class="gantt">
+            <thead>
+              <tr>
+                <th style="min-width:70px">País</th>
+                <th style="min-width:130px">Responsable</th>
+                <th style="min-width:200px">Actividad</th>
+                <th class="gantt-bar-cell">Timeline (Feb – May 2026)</th>
+              </tr>
+            </thead>
+            <tbody id="gantt-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="section">
+      <p class="section-title">2. Detalle de Actividades por País y Responsable</p>
+      <div class="detail-outer">
+        <div class="detail-scroll">
+          <table class="detail">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>País</th>
+                <th>Responsable</th>
+                <th>Actividad</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Duración</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="detail-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /tab-dashboard -->
+
+<!-- ══════════════ TAB: ADMINISTRACIÓN ══════════════ -->
+<div id="tab-admin" class="tab-panel">
+  <div class="admin-content">
+
+    <!-- Cargar estatus -->
+    <div class="admin-card">
+      <h3>📥 Cargar / Actualizar Estatus de Proyectos</h3>
+      <p class="desc">
+        Carga un archivo Excel (.xlsx) con el formato estándar del cronograma para actualizar o agregar un proyecto al dashboard.
+        El archivo debe contener las columnas: <b>País, Responsable, Actividad, Inicio, Fin</b> (y opcionalmente <b>Días</b>).
+        El nombre del proyecto se tomará del nombre del archivo Excel cargado.
+      </p>
+
+      <div class="upload-zone" id="upload-zone"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <input type="file" id="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+        <div class="upload-icon">📂</div>
+        <h4>Arrastra tu archivo Excel aquí</h4>
+        <p>o haz clic para seleccionar · Formatos aceptados: .xlsx, .xls</p>
+      </div>
+
+      <div>
+        <button class="btn-upload" id="btn-load" onclick="document.getElementById('file-input').click()">
+          📤 Seleccionar archivo Excel
+        </button>
+        <a class="btn-secondary" id="btn-download-template" href="#" onclick="downloadTemplate(); return false;">
+          ⬇️ Descargar plantilla
+        </a>
+      </div>
+
+      <div class="upload-result" id="upload-result"></div>
+      <div class="preview-wrap" id="preview-wrap">
+        <div class="preview-header">
+          <span id="preview-title">Vista previa de datos</span>
+          <span id="preview-count" style="font-size:11px;color:var(--gray-mid)"></span>
+        </div>
+        <div class="preview-scroll">
+          <table class="preview-table" id="preview-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formato esperado -->
+    <div class="admin-card">
+      <h3>📋 Formato esperado del archivo Excel</h3>
+      <p class="desc">
+        El archivo debe tener una hoja llamada <b>Gantt</b> (o la primera hoja disponible) con la siguiente estructura de columnas en la fila 1:
+      </p>
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th>Columna</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Requerido</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>A</b></td>
+            <td>País</td>
+            <td>Texto</td>
+            <td>Nombre del país (ej: Venezuela, Colombia, Argentina)</td>
+            <td><span class="col-required">Requerido</span></td>
+          </tr>
+          <tr>
+            <td><b>B</b></td>
+            <td>Responsable</td>
+            <td>Texto</td>
+            <td>Área o persona responsable de la actividad</td>
+            <td><span class="col-required">Requerido</span></td>
+          </tr>
+          <tr>
+            <td><b>C</b></td>
+            <td>Actividad</td>
+            <td>Texto</td>
+            <td>Nombre o descripción de la actividad</td>
+            <td><span class="col-required">Requerido</span></td>
+          </tr>
+          <tr>
+            <td><b>D</b></td>
+            <td>Inicio</td>
+            <td>Fecha (YYYY-MM-DD)</td>
+            <td>Fecha de inicio de la actividad</td>
+            <td><span class="col-required">Requerido</span></td>
+          </tr>
+          <tr>
+            <td><b>E</b></td>
+            <td>Fin</td>
+            <td>Fecha (YYYY-MM-DD)</td>
+            <td>Fecha de finalización de la actividad</td>
+            <td><span class="col-required">Requerido</span></td>
+          </tr>
+          <tr>
+            <td><b>F</b></td>
+            <td>Días</td>
+            <td>Número entero</td>
+            <td>Duración en días hábiles (si se omite, se calcula automáticamente)</td>
+            <td><span class="col-optional">Opcional</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px;padding:12px 16px;background:var(--blue-soft);border-radius:8px;border:1px solid var(--blue-pale);font-size:12px;color:var(--navy);">
+        💡 <b>Nota:</b> El archivo Excel del cronograma Gantt con fechas en columnas (formato original) también es aceptado. El sistema detectará automáticamente el formato y extraerá las fechas de inicio y fin de cada actividad.
+      </div>
+    </div>
+
+    <!-- Proyectos cargados -->
+    <div class="admin-card">
+      <h3>📁 Proyectos en el Dashboard</h3>
+      <p class="desc">Lista de proyectos actualmente disponibles para visualizar en el dashboard.</p>
+      <table class="schema-table" id="projects-list-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre del Proyecto</th>
+            <th>Actividades</th>
+            <th>Países</th>
+            <th>Período</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="projects-list-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div><!-- /tab-admin -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Default data (Etiquetas Amarillas) ───────────────────────────────────────
+const DEFAULT_DATA = [
+  {country:'Venezuela',resp:'Innovación',act:'Solicitud inicial',start:'2026-02-10',end:'2026-02-10',days:1},
+  {country:'Venezuela',resp:'Compras',act:'Producción de Muestra 1',start:'2026-02-11',end:'2026-02-12',days:2},
+  {country:'Venezuela',resp:'Compras',act:'Muestra 1',start:'2026-02-13',end:'2026-02-13',days:1},
+  {country:'Venezuela',resp:'Innovación',act:'Evaluación de Muestra 1',start:'2026-02-18',end:'2026-02-24',days:5},
+  {country:'Venezuela',resp:'Compras',act:'Ajustes sobre Muestra 1',start:'2026-02-24',end:'2026-02-24',days:1},
+  {country:'Venezuela',resp:'Compras',act:'Producción de Muestra 2',start:'2026-02-25',end:'2026-03-03',days:7},
+  {country:'Venezuela',resp:'Compras',act:'Muestra 2 (línea delgada azul y negra)',start:'2026-03-04',end:'2026-03-04',days:1},
+  {country:'Venezuela',resp:'Innovación',act:'Evaluación de Muestra 2',start:'2026-03-05',end:'2026-03-09',days:3},
+  {country:'Venezuela',resp:'Innovación + Comercial',act:'Aprobación final de muestra 2',start:'2026-03-10',end:'2026-03-10',days:1},
+  {country:'Venezuela',resp:'Comercial',act:'Definición de criterios para cantidades',start:'2026-03-11',end:'2026-03-17',days:5},
+  {country:'Venezuela',resp:'Comercial',act:'Propuesta de cantidades (Costos y precios)',start:'2026-03-18',end:'2026-03-18',days:1},
+  {country:'Venezuela',resp:'Comercial',act:'Aprobación final de cantidades',start:'2026-03-19',end:'2026-04-06',days:13},
+  {country:'Venezuela',resp:'Compras',act:'Solicitud al proveedor',start:'2026-04-06',end:'2026-04-06',days:1},
+  {country:'Venezuela',resp:'Compras',act:'Tiempo de producción',start:'2026-04-07',end:'2026-04-21',days:15},
+  {country:'Venezuela',resp:'Compras',act:'Roll out',start:'2026-04-22',end:'2026-04-30',days:10},
+  {country:'Venezuela',resp:'Compras',act:'Implementación 100% 🏁',start:'2026-05-02',end:'2026-05-02',days:1},
+  {country:'Colombia',resp:'Sistemas',act:'Evaluación preliminar',start:'2026-02-11',end:'2026-03-12',days:21},
+  {country:'Colombia',resp:'Innovación',act:'Solicitud inicial',start:'2026-03-13',end:'2026-03-13',days:1},
+  {country:'Colombia',resp:'Compras',act:'Evaluación de Muestra 1',start:'2026-03-16',end:'2026-03-18',days:3},
+  {country:'Colombia',resp:'Compras',act:'Ajustes sobre Muestra 1 (Problemas en tinta)',start:'2026-03-19',end:'2026-03-19',days:1},
+  {country:'Colombia',resp:'Compras',act:'Producción de Muestra 2',start:'2026-03-20',end:'2026-04-08',days:14},
+  {country:'Colombia',resp:'Comercial',act:'Propuesta de cantidades (Costos y precios)',start:'2026-04-08',end:'2026-04-10',days:3},
+  {country:'Argentina',resp:'Innovación',act:'Solicitud inicial',start:'2026-04-06',end:'2026-04-06',days:1},
+  {country:'Argentina',resp:'Compras',act:'Producción de Muestra 1',start:'2026-04-07',end:'2026-04-10',days:4},
+  {country:'Argentina',resp:'Comercial',act:'Propuesta de cantidades (Costos y precios)',start:'2026-04-13',end:'2026-04-17',days:5},
+];
+
+// ─── Projects registry ────────────────────────────────────────────────────────
+let PROJECTS = {
+  'Implementación de Etiquetas Amarillas': DEFAULT_DATA
+};
+let CURRENT_PROJECT = 'Implementación de Etiquetas Amarillas';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+const TODAY   = new Date('2026-04-08');
+const RNG_S   = new Date('2026-02-10');
+const RNG_E   = new Date('2026-05-02');
+const TOTAL_D = (RNG_E - RNG_S) / 86400000;
+
+const FLAGS    = {Venezuela:'🇻🇪',Colombia:'🇨🇴',Argentina:'🇦🇷'};
+const BADGE_CL = {Venezuela:'cbadge-ve',Colombia:'cbadge-co',Argentina:'cbadge-ar'};
+const BAR_CL   = {Venezuela:'bar-ve',Colombia:'bar-co',Argentina:'bar-ar'};
+const DUR_CL   = {Venezuela:'dur-ve',Colombia:'dur-co',Argentina:'dur-ar'};
+const BAR_HEX  = {Venezuela:'#2a7fc1',Colombia:'#2a9a5f',Argentina:'#c98020'};
+
+function getFlag(c)    { return FLAGS[c]    || '🏳'; }
+function getBadgeCl(c) { return BADGE_CL[c] || 'cbadge-ve'; }
+function getBarCl(c)   { return BAR_CL[c]   || 'bar-ve'; }
+function getDurCl(c)   { return DUR_CL[c]   || 'dur-ve'; }
+function getBarHex(c)  { return BAR_HEX[c]  || '#2a7fc1'; }
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab === 'admin') renderProjectsList();
+}
+
+// ─── Project filter ───────────────────────────────────────────────────────────
+function onProjectChange(sel) {
+  CURRENT_PROJECT = sel.value;
+  document.getElementById('project-badge').textContent = '📌 ' + CURRENT_PROJECT;
+
+  // Recalculate date range for this project
+  const d = PROJECTS[CURRENT_PROJECT] || [];
+  if (d.length > 0) {
+    const starts = d.map(x => new Date(x.start));
+    const ends   = d.map(x => new Date(x.end));
+    window._RNG_S = new Date(Math.min(...starts));
+    window._RNG_E = new Date(Math.max(...ends));
+  }
+
+  // Reset country filter
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.pill').classList.add('active');
+  currentFilter = 'all';
+
+  render();
+}
+
+function updateProjectSelect() {
+  const sel = document.getElementById('project-select');
+  sel.innerHTML = '';
+  Object.keys(PROJECTS).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    if (name === CURRENT_PROJECT) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// ─── Gantt helpers ────────────────────────────────────────────────────────────
+function getRangeStart() { return window._RNG_S || RNG_S; }
+function getRangeEnd()   { return window._RNG_E || RNG_E; }
+function getTotalDays()  { return (getRangeEnd() - getRangeStart()) / 86400000; }
+
+function toPos(d)  {
+  return ((new Date(d) - getRangeStart()) / 86400000) / getTotalDays() * 100;
+}
+function toPct(d)  {
+  return Math.max((d / getTotalDays()) * 100, 0.6);
+}
+
+function getStatus(item) {
+  const s = new Date(item.start), e = new Date(item.end);
+  if (e < TODAY)                return 'done';
+  if (s <= TODAY && e >= TODAY) return 'progress';
+  return 'pending';
+}
+
+// ─── Country filter ───────────────────────────────────────────────────────────
+let currentFilter = 'all';
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  render();
+}
+
+function filtered() {
+  const data = PROJECTS[CURRENT_PROJECT] || [];
+  return currentFilter === 'all' ? data : data.filter(d => d.country === currentFilter);
+}
+
+// ─── Render summary ───────────────────────────────────────────────────────────
+function renderSummary() {
+  const d = filtered();
+  const countries = [...new Set(d.map(x => x.country))].length;
+  const done = d.filter(x => getStatus(x) === 'done').length;
+  const prog = d.filter(x => getStatus(x) === 'progress').length;
+  const pend = d.filter(x => getStatus(x) === 'pending').length;
+  const pct  = d.length ? Math.round(done / d.length * 100) : 0;
+  const cards = [
+    {val:d.length, lbl:'Actividades totales'},
+    {val:countries, lbl:'Países activos'},
+    {val:done, lbl:'Completadas'},
+    {val:prog, lbl:'En curso'},
+    {val:pend, lbl:'Pendientes'},
+    {val:pct+'%', lbl:'Progreso general'},
+  ];
+  document.getElementById('summary-cards').innerHTML = cards.map(c =>
+    `<div class="s-card"><div class="val">${c.val}</div><div class="lbl">${c.lbl}</div></div>`
+  ).join('');
+}
+
+// ─── Render Gantt ─────────────────────────────────────────────────────────────
+function renderGantt() {
+  const d  = filtered();
+  const tp = toPos(TODAY.toISOString().split('T')[0]);
+  const groups = {};
+  d.forEach(item => { (groups[item.country] = groups[item.country] || []).push(item); });
+
+  // Update month ruler
+  const rs = getRangeStart();
+  const re = getRangeEnd();
+  const months = [];
+  let cur = new Date(rs.getFullYear(), rs.getMonth(), 1);
+  while (cur <= re) {
+    months.push(cur.toLocaleDateString('es', {month:'short'}).toUpperCase());
+    cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+  }
+  document.getElementById('month-ruler').innerHTML = months.map(m => `<span>${m}</span>`).join('');
+
+  let html = '';
+  for (const [country, items] of Object.entries(groups)) {
+    html += `<tr class="g-group"><td colspan="4">${getFlag(country)} ${country}</td></tr>`;
+    items.forEach(item => {
+      const sp    = toPos(item.start);
+      const wp    = toPct(item.days);
+      const barCl = getBarCl(country);
+      const isDot = item.days === 1;
+      const barS  = isDot ? `left:${sp}%;width:14px;` : `left:${sp}%;width:${wp}%;`;
+      const bClass = isDot ? `g-bar ${barCl} g-dot` : `g-bar ${barCl}`;
+      html += `<tr>
+        <td><span class="country-badge ${getBadgeCl(country)}" style="font-size:10px">${getFlag(country)}</span></td>
+        <td><span class="resp-tag">${item.resp}</span></td>
+        <td style="font-size:12px;color:#1a2b3c">${item.act}</td>
+        <td class="gantt-bar-cell">
+          <div class="gantt-timeline">
+            <div class="today-line" style="left:${tp}%">
+              <span class="today-tip">HOY</span>
+            </div>
+            <div class="${bClass}" style="${barS}" title="${item.start} → ${item.end} (${item.days}d)"></div>
+          </div>
+        </td>
+      </tr>`;
+    });
+  }
+  document.getElementById('gantt-body').innerHTML = html;
+}
+
+// ─── Render detail table ──────────────────────────────────────────────────────
+function renderDetail() {
+  const d = filtered();
+  const maxD = d.length ? Math.max(...d.map(x => x.days)) : 1;
+  let html = '', idx = 1;
+  const groups = {};
+  d.forEach(item => { (groups[item.country] = groups[item.country] || []).push(item); });
+
+  for (const [country, items] of Object.entries(groups)) {
+    const bc  = getBadgeCl(country);
+    const dc  = getDurCl(country);
+    const hex = getBarHex(country);
+    items.forEach(item => {
+      const st = getStatus(item);
+      const statusHtml = st === 'done'
+        ? `<span class="status-badge s-done">&#10003; Completada</span>`
+        : st === 'progress'
+        ? `<span class="status-badge s-prog">&#9654; En curso</span>`
+        : `<span class="status-badge s-pend">&#9633; Pendiente</span>`;
+      const bw = Math.round(item.days / maxD * 72);
+      html += `<tr>
+        <td class="num-cell">${idx++}</td>
+        <td><span class="country-badge ${bc}">${getFlag(country)} ${country}</span></td>
+        <td><span class="resp-tag">${item.resp}</span></td>
+        <td style="font-size:13px;color:#1a2b3c">${item.act}</td>
+        <td style="font-size:12px;white-space:nowrap;color:#3d4a5c">${item.start}</td>
+        <td style="font-size:12px;white-space:nowrap;color:#3d4a5c">${item.end}</td>
+        <td>
+          <div class="dur-wrap">
+            <span style="min-width:28px;font-size:12px;font-weight:600;color:${hex}">${item.days}d</span>
+            <div class="dur-bar ${dc}" style="width:${bw}px"></div>
+          </div>
+        </td>
+        <td>${statusHtml}</td>
+      </tr>`;
+    });
+  }
+  document.getElementById('detail-body').innerHTML = html;
+}
+
+// ─── Master render ────────────────────────────────────────────────────────────
+function render() {
+  renderSummary();
+  renderGantt();
+  renderDetail();
+}
+
+// ─── Projects list (admin) ────────────────────────────────────────────────────
+function renderProjectsList() {
+  const tbody = document.getElementById('projects-list-body');
+  const projects = Object.keys(PROJECTS);
+  let html = '';
+  projects.forEach((name, i) => {
+    const data = PROJECTS[name];
+    const countries = [...new Set(data.map(x => x.country))].join(', ');
+    const starts = data.map(x => x.start).sort();
+    const ends   = data.map(x => x.end).sort();
+    const period = starts.length ? `${starts[0]} → ${ends[ends.length-1]}` : '—';
+    const isDefault = name === 'Implementación de Etiquetas Amarillas' && data === DEFAULT_DATA;
+    html += `<tr>
+      <td class="num-cell">${i+1}</td>
+      <td><b>${name}</b>${isDefault ? ' <span style="font-size:10px;color:var(--gray-mid)">(predeterminado)</span>' : ''}</td>
+      <td>${data.length} actividades</td>
+      <td>${countries}</td>
+      <td style="font-size:11px">${period}</td>
+      <td>
+        <button onclick="viewProject('${name}')" style="background:var(--navy);color:#fff;border:none;padding:4px 12px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;">
+          Ver
+        </button>
+        ${!isDefault ? `<button onclick="removeProject('${name}')" style="background:#fde8e8;color:#c0392b;border:none;padding:4px 12px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:6px;">Eliminar</button>` : ''}
+      </td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function viewProject(name) {
+  CURRENT_PROJECT = name;
+  document.getElementById('project-badge').textContent = '📌 ' + name;
+  updateProjectSelect();
+  currentFilter = 'all';
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.pill').classList.add('active');
+  window._RNG_S = null; window._RNG_E = null;
+  onProjectChange({value: name});
+  switchTab('dashboard', document.querySelector('.tab-btn'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn').classList.add('active');
+  showToast('✅ Visualizando: ' + name, 'success');
+}
+
+function removeProject(name) {
+  if (!confirm(`¿Eliminar el proyecto "${name}"?`)) return;
+  delete PROJECTS[name];
+  if (CURRENT_PROJECT === name) {
+    CURRENT_PROJECT = Object.keys(PROJECTS)[0];
+  }
+  updateProjectSelect();
+  renderProjectsList();
+  showToast('🗑️ Proyecto eliminado', 'success');
+}
+
+// ─── File upload ──────────────────────────────────────────────────────────────
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('upload-zone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function formatDateSerial(serial) {
+  // Excel date serial to YYYY-MM-DD
+  const utc_days  = Math.floor(serial - 25569);
+  const utc_value = utc_days * 86400;
+  const d = new Date(utc_value * 1000);
+  return d.toISOString().split('T')[0];
+}
+
+function parseDate(val) {
+  if (!val) return null;
+  if (typeof val === 'number') return formatDateSerial(val);
+  if (val instanceof Date) return val.toISOString().split('T')[0];
+  const s = String(val).trim();
+  // Try YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
+  // Try DD/MM/YYYY
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  return null;
+}
+
+function daysBetween(start, end) {
+  const s = new Date(start), e = new Date(end);
+  return Math.max(1, Math.round((e - s) / 86400000) + 1);
+}
+
+function processFile(file) {
+  showResult('info', `⏳ Leyendo archivo: <b>${file.name}</b>...`);
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb   = XLSX.read(data, {type:'array', cellDates: true});
+
+      // Use 'Gantt' sheet or first available
+      const sheetName = wb.SheetNames.includes('Gantt') ? 'Gantt' : wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, dateNF:'yyyy-mm-dd'});
+
+      if (rows.length < 2) {
+        showResult('error', '❌ El archivo no contiene suficientes filas de datos.');
+        return;
+      }
+
+      const header = rows[0].map(h => String(h || '').trim().toLowerCase());
+      
+      // Detect format: simple (País, Responsable, Actividad, Inicio, Fin) or Gantt (dates as columns)
+      const paisIdx  = header.findIndex(h => h.includes('pa') && (h.includes('s') || h.includes('ís')));
+      const respIdx  = header.findIndex(h => h.includes('resp'));
+      const actIdx   = header.findIndex(h => h.includes('activ'));
+      const iniIdx   = header.findIndex(h => h.includes('inic') || h.includes('start'));
+      const finIdx   = header.findIndex(h => h.includes('fin') || h.includes('end'));
+      const diasIdx  = header.findIndex(h => h.includes('d') && (h.includes('as') || h.includes('ías') || h.includes('ay')));
+
+      const simpleFormat = paisIdx >= 0 && respIdx >= 0 && actIdx >= 0 && iniIdx >= 0 && finIdx >= 0;
+      
+      let parsed = [];
+
+      if (simpleFormat) {
+        // Simple columnar format
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          const pais  = String(row[paisIdx] || '').trim();
+          const resp  = String(row[respIdx] || '').trim();
+          const act   = String(row[actIdx]  || '').trim();
+          const start = parseDate(row[iniIdx]);
+          const end   = parseDate(row[finIdx]);
+          if (!pais || !act || !start || !end) continue;
+          const days = diasIdx >= 0 && row[diasIdx] ? parseInt(row[diasIdx]) : daysBetween(start, end);
+          parsed.push({country: pais, resp, act, start, end, days});
+        }
+      } else {
+        // Gantt format: País(0), Responsable(1), Actividad(2), then date columns
+        const dateColOffset = 3;
+        const dateCols = header.slice(dateColOffset).map((h, i) => ({
+          idx: i + dateColOffset,
+          date: parseDate(h) || h
+        })).filter(c => c.date && c.date.match && c.date.match(/^\d{4}-\d{2}-\d{2}/));
+
+        for (let i = 1; i < rows.length; i++) {
+          const row   = rows[i];
+          const pais  = String(row[0] || '').trim();
+          const resp  = String(row[1] || '').trim();
+          const act   = String(row[2] || '').trim();
+          if (!pais || !act) continue;
+
+          // Find filled date cells (non-empty)
+          const filledDates = dateCols.filter(c => {
+            const v = row[c.idx];
+            return v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== 'NaT';
+          }).map(c => c.date).sort();
+
+          let start, end, days;
+          if (filledDates.length > 0) {
+            start = filledDates[0];
+            end   = filledDates[filledDates.length - 1];
+            days  = daysBetween(start, end);
+          } else if (dateCols.length > 0) {
+            start = dateCols[0].date;
+            end   = dateCols[dateCols.length - 1].date;
+            days  = 1;
+          } else {
+            continue;
+          }
+          parsed.push({country: pais, resp, act, start, end, days});
+        }
+      }
+
+      if (parsed.length === 0) {
+        showResult('error', '❌ No se encontraron actividades válidas en el archivo. Verifica el formato de columnas.');
+        return;
+      }
+
+      // Project name from filename (without extension)
+      const projectName = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ').replace(/-/g, ' ').trim();
+
+      // Save
+      PROJECTS[projectName] = parsed;
+      CURRENT_PROJECT = projectName;
+      window._RNG_S = null; window._RNG_E = null;
+
+      // Update UI
+      updateProjectSelect();
+
+      // Show preview
+      showPreview(parsed, projectName);
+      showResult('success', `✅ Proyecto <b>"${projectName}"</b> cargado correctamente con <b>${parsed.length} actividades</b>. Ve al Dashboard para visualizarlo.`);
+      showToast(`✅ ${parsed.length} actividades cargadas`, 'success');
+
+    } catch(err) {
+      showResult('error', `❌ Error al procesar el archivo: ${err.message}`);
+      console.error(err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  // Reset input
+  document.getElementById('file-input').value = '';
+}
+
+function showResult(type, html) {
+  const el = document.getElementById('upload-result');
+  el.className = 'upload-result ' + type;
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+function showPreview(data, projectName) {
+  const wrap = document.getElementById('preview-wrap');
+  document.getElementById('preview-title').textContent = `Vista previa – ${projectName}`;
+  document.getElementById('preview-count').textContent = `${data.length} actividades`;
+
+  const table = document.getElementById('preview-table');
+  let html = `<thead><tr><th>#</th><th>País</th><th>Responsable</th><th>Actividad</th><th>Inicio</th><th>Fin</th><th>Días</th></tr></thead><tbody>`;
+  data.slice(0, 20).forEach((row, i) => {
+    html += `<tr>
+      <td>${i+1}</td>
+      <td>${row.country}</td>
+      <td>${row.resp}</td>
+      <td>${row.act}</td>
+      <td>${row.start}</td>
+      <td>${row.end}</td>
+      <td>${row.days}</td>
+    </tr>`;
+  });
+  if (data.length > 20) html += `<tr><td colspan="7" style="text-align:center;color:var(--gray-mid);font-style:italic">... y ${data.length - 20} actividades más</td></tr>`;
+  html += '</tbody>';
+  table.innerHTML = html;
+  wrap.style.display = 'block';
+}
+
+// ─── Download template ────────────────────────────────────────────────────────
+function downloadTemplate() {
+  const wb = XLSX.utils.book_new();
+  const wsData = [
+    ['País', 'Responsable', 'Actividad', 'Inicio', 'Fin', 'Días'],
+    ['Venezuela', 'Innovación', 'Solicitud inicial', '2026-02-10', '2026-02-10', 1],
+    ['Venezuela', 'Compras', 'Producción de Muestra 1', '2026-02-11', '2026-02-12', 2],
+    ['Colombia', 'Sistemas', 'Evaluación preliminar', '2026-02-11', '2026-03-12', 21],
+    ['Argentina', 'Innovación', 'Solicitud inicial', '2026-04-06', '2026-04-06', 1],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:15},{wch:25},{wch:45},{wch:14},{wch:14},{wch:8}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Gantt');
+  XLSX.writeFile(wb, 'plantilla_cronograma.xlsx');
+  showToast('⬇️ Plantilla descargada', 'success');
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast toast-${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3500);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+render();
+updateProjectSelect();
+renderProjectsList();
+</script>
+</body>
+</html>
