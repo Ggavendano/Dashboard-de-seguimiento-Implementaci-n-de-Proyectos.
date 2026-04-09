@@ -1,5 +1,5 @@
 # Dashboard de seguimiento | Proyectos en implementación 🚀
-## 🔗 Ver Dashboard aqui: [https://ggavendano.github.io/Suministros/](https://ggavendano.github.io/Dashboard-de-seguimiento-Implementaci-n-de-Proyectos./
+## 🔗 Ver Dashboard aqui: (https://ggavendano.github.io/Dashboard-de-seguimiento-Implementaci-n-de-Proyectos./
 )
 Este dashboard da visibilidad mediante un Diagrama de Gantt de los proyectos en proceso de implementación.
 
